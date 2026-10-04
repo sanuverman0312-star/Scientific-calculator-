@@ -1,0 +1,6 @@
+{
+  "name": "ProSci",
+  "description": "fx-991ES style scientific calculator featuring Natural V.P.A.M. display, matrix, vector, equation solver, statistics, base-N, table, and unit conversions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
