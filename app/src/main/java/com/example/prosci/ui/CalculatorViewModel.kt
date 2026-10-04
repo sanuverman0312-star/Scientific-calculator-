@@ -146,6 +146,14 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun setCursorPosition(position: Int) {
+        vibrate()
+        _uiState.update { curr ->
+            val safePos = position.coerceIn(0, curr.expression.length)
+            curr.copy(cursorPos = safePos)
+        }
+    }
+
     private fun handleType(text: String) {
         val state = _uiState.value
         val wiz = state.wizardState
@@ -436,6 +444,11 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         _uiState.update { it.copy(themeId = nextTheme) }
     }
 
+    fun setTheme(themeId: String) {
+        vibrate()
+        _uiState.update { it.copy(themeId = themeId) }
+    }
+
     fun copyResult() {
         vibrate()
         val textToCopy = _uiState.value.resultText.ifEmpty { _uiState.value.expression }
@@ -613,6 +626,15 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
                     _uiState.update { it.copy(wizardState = wiz.copy(scrollIndex = newScroll)) }
                 }
             }
+        }
+    }
+
+    fun selectWizardMenuIndex(index: Int) {
+        vibrate()
+        val wiz = _uiState.value.wizardState ?: return
+        if (wiz.stage == "menu") {
+            val safeIdx = index.coerceIn(0, wiz.menuOptions.size - 1)
+            _uiState.update { it.copy(wizardState = wiz.copy(menuIndex = safeIdx)) }
         }
     }
 

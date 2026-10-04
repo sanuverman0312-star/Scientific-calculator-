@@ -8,12 +8,9 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,11 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.prosci.ui.CalcMode
 import com.example.prosci.ui.CalculatorViewModel
 import com.example.prosci.ui.components.*
 import com.example.prosci.ui.theme.LocalProSciColors
@@ -73,96 +69,94 @@ fun CalculatorScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val colors = LocalProSciColors.current
-    val scrollState = rememberScrollState()
 
+    // Outer screen: full-screen, centered, non-scrolling, adapts 100% to selected theme
     Box(
         modifier = modifier
             .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        colors.background,
+                        colors.background.copy(alpha = 0.95f)
+                    )
+                )
+            )
             .testTag("calculator_screen"),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.Center
     ) {
-        Column(
+        // Calculator Body: Centered, fixed frame that fits the screen without shifting,
+        // dynamically themed with cardBackground and borderLight
+        Box(
             modifier = Modifier
                 .widthIn(max = 440.dp)
                 .fillMaxWidth()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Quick Toolbar
-            CalculatorToolbar(
-                state = state,
-                viewModel = viewModel,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-
-            // Calculator Body / Casing
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(12.dp, RoundedCornerShape(20.dp))
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(colors.cardBackground)
-                    .border(1.5.dp, colors.borderLight, RoundedCornerShape(20.dp))
-                    .padding(horizontal = 14.dp, vertical = 12.dp)
-                    .testTag("calculator_body")
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Calculator Brand Bar
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp, vertical = 2.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "ProSci",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.functionKeyText,
-                            fontFamily = FontFamily.SansSerif,
-                            letterSpacing = 0.5.sp
+                .fillMaxHeight()
+                .padding(horizontal = 6.dp, vertical = 2.dp)
+                .shadow(16.dp, RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(24.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            colors.cardBackground,
+                            colors.cardBackground.copy(alpha = 0.96f)
                         )
-                        Text(
-                            text = "fx-991ES · NATURAL-V.P.A.M.",
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = colors.functionKeyText.copy(alpha = 0.75f),
-                            letterSpacing = 0.5.sp
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    // LCD Screen
-                    LcdScreen(state = state)
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Keypad
-                    Keypad(
-                        onKeyPress = { main, shift, alpha, action ->
-                            viewModel.onKeyPressed(main, shift, alpha, action)
-                        }
                     )
-                }
+                )
+                .border(
+                    2.dp,
+                    colors.borderLight,
+                    RoundedCornerShape(24.dp)
+                )
+                .padding(horizontal = 8.dp, vertical = 6.dp)
+                .testTag("calculator_body")
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // 1. Fixed Top Header Bar: Does not scroll, uses theme colors
+                CalculatorToolbar(
+                    state = state,
+                    viewModel = viewModel
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // 2. Fixed LCD Display: 152dp comfortable height, stable, does not grow/shrink with menus
+                LcdScreen(
+                    state = state,
+                    onOpenHistory = { viewModel.openHistoryDialog() },
+                    onCursorMoved = { pos -> viewModel.setCursorPosition(pos) },
+                    onSelectMenuIndex = { idx -> viewModel.selectWizardMenuIndex(idx) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(152.dp)
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // 3. Keypad / Menu Area: Occupies remaining vertical space (weight 1f).
+                // Well-proportioned keys, smooth touch scroll for small screens, zero horizontal overflow.
+                Keypad(
+                    state = state,
+                    onKeyPress = { main, shift, alpha, action ->
+                        viewModel.onKeyPressed(main, shift, alpha, action)
+                    },
+                    onModeClick = { viewModel.openModeDialog() },
+                    onAngleClick = { viewModel.cycleAngleUnit() },
+                    onFormatClick = { viewModel.cycleNumberFormat() },
+                    onMathIoClick = { viewModel.toggleMathIo() },
+                    onSdClick = { viewModel.toggleStandardDecimal() },
+                    onCompClick = { viewModel.setMode(CalcMode.COMP) },
+                    onStatClick = { viewModel.setMode(CalcMode.STAT) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Footer note
-            Text(
-                text = "ProSci Natural-V.P.A.M. · Tap S⇔D to swap exact & decimal",
-                fontSize = 10.sp,
-                color = colors.functionKeyText.copy(alpha = 0.5f),
-                fontFamily = FontFamily.SansSerif
-            )
         }
 
-        // Dialog Overlays
+        // Dialog Overlays (Unchanged 100%)
         if (state.showModeDialog) {
             ModeDialog(
                 viewModel = viewModel,
