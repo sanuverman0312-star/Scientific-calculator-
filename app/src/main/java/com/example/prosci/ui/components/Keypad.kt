@@ -500,7 +500,7 @@ private fun ScientificDeck(
 ) {
     val r1 = listOf(
         KeyDef("x²", shiftLabel = "x³", testTag = "key_x2"),
-        KeyDef("xʸ", shiftLabel = "ˣ√", action = "^", testTag = "key_power"),
+        KeyDef("xʸ", shiftLabel = "ˣ√", testTag = "key_power"),
         KeyDef("log", shiftLabel = "10ˣ", testTag = "key_log"),
         KeyDef("ln", shiftLabel = "eˣ", testTag = "key_ln"),
         KeyDef("(", alphaLabel = "Y", testTag = "key_lparen"),
@@ -551,30 +551,30 @@ private fun DeckRow6(
                 fontSize = 13.sp,
                 onClick = {
                     val mainVal = when (key.label) {
-                        "x²" -> "^2"
+                        "x²" -> "²"
                         "xʸ" -> "^"
                         "log" -> "log("
                         "ln" -> "ln("
                         "sin" -> "sin("
                         "cos" -> "cos("
                         "tan" -> "tan("
-                        "√" -> "sqrt("
-                        "x⁻¹" -> "^(-1)"
+                        "√" -> "√("
+                        "x⁻¹" -> "⁻¹"
                         "nCr" -> "nCr"
                         "π" -> "π"
-                        "(−)" -> "(-)"
+                        "(−)" -> "−"
                         "∫" -> "∫("
                         else -> key.label
                     }
                     val shiftVal = when (key.shiftLabel) {
-                        "x³" -> "^3"
-                        "ˣ√" -> "root("
+                        "x³" -> "³"
+                        "ˣ√" -> "ˣ√("
                         "10ˣ" -> "10^("
                         "eˣ" -> "e^("
-                        "sin⁻¹" -> "asin("
-                        "cos⁻¹" -> "acos("
-                        "tan⁻¹" -> "atan("
-                        "∛" -> "cbrt("
+                        "sin⁻¹" -> "sin⁻¹("
+                        "cos⁻¹" -> "cos⁻¹("
+                        "tan⁻¹" -> "tan⁻¹("
+                        "∛" -> "∛("
                         "x!" -> "!"
                         "nPr" -> "nPr"
                         "RCL" -> "@RCL"

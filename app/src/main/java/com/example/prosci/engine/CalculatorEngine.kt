@@ -74,10 +74,36 @@ class CalculatorEngine(
         return round(p)
     }
 
+    fun normalizeExpression(expr: String): String {
+        var s = expr
+            .replace("sin⁻¹", "asin")
+            .replace("cos⁻¹", "acos")
+            .replace("tan⁻¹", "atan")
+            .replace("sinh⁻¹", "asinh")
+            .replace("cosh⁻¹", "acosh")
+            .replace("tanh⁻¹", "atanh")
+            .replace("∛", "cbrt")
+            .replace("ˣ√", "root")
+            .replace("²", "^2")
+            .replace("³", "^3")
+            .replace("⁻¹", "^(-1)")
+            .replace("−", "-")
+            .replace("–", "-")
+            .replace("—", "-")
+            .replace("×10^", "*10^")
+            .replace("×", "*")
+            .replace("÷", "/")
+
+        s = s.replace(Regex("√([0-9.]+|[ABCDEFXYM])(?![a-zA-Z0-9.(])")) { "sqrt(${it.groupValues[1]})" }
+        s = s.replace("√", "sqrt")
+
+        return s
+    }
+
     fun tokenize(input: String): List<Token> {
         val tokens = mutableListOf<Token>()
         var i = 0
-        val s = input
+        val s = normalizeExpression(input)
 
         while (i < s.length) {
             val c = s[i]

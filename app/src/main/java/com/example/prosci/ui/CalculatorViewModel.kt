@@ -184,8 +184,18 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
         var t = text
         if (state.isHyp) {
-            if (t.startsWith("sin(") || t.startsWith("cos(") || t.startsWith("tan(")) {
-                t = t.replace("(", "h(")
+            if (t.startsWith("sin⁻¹(")) {
+                t = t.replace("sin⁻¹(", "sinh⁻¹(")
+            } else if (t.startsWith("cos⁻¹(")) {
+                t = t.replace("cos⁻¹(", "cosh⁻¹(")
+            } else if (t.startsWith("tan⁻¹(")) {
+                t = t.replace("tan⁻¹(", "tanh⁻¹(")
+            } else if (t.startsWith("sin(")) {
+                t = t.replace("sin(", "sinh(")
+            } else if (t.startsWith("cos(")) {
+                t = t.replace("cos(", "cosh(")
+            } else if (t.startsWith("tan(")) {
+                t = t.replace("tan(", "tanh(")
             } else if (t.startsWith("asin(") || t.startsWith("acos(") || t.startsWith("atan(")) {
                 t = t.replace("(", "h(")
             }
@@ -193,7 +203,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
 
         if (state.isDone) {
-            if (Regex("^([+\\-×÷*/^!%]|nPr|nCr)").containsMatchIn(t)) {
+            if (Regex("^([+\\-×÷*/^!%]|nPr|nCr|²|³|⁻¹|−)").containsMatchIn(t)) {
                 _uiState.update { it.copy(expression = "Ans", cursorPos = 3, isDone = false, errorMessage = null) }
             } else {
                 _uiState.update { it.copy(expression = "", cursorPos = 0, isDone = false, errorMessage = null) }
